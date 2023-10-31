@@ -2,7 +2,7 @@
 function App() {
   return (
     <div >
-        <p>
+        <p className="p-0 text-orange-500">
           hello World .....
         </p>
       

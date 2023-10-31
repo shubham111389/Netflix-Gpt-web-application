@@ -1,13 +1,8 @@
 
+import Body from "./components/Body";
+
 function App() {
-  return (
-    <div >
-        <p className="p-0 text-orange-500">
-          hello World .....
-        </p>
-      
-    </div>
-  );
+    return <Body/>;
 }
 
 export default App;

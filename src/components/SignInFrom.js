@@ -1,21 +1,32 @@
 import React, { useState, useRef } from "react";
 import "../app.css";
 import { checkValidData } from "../utils/validate";
+import { useNavigate } from "react-router-dom";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  updateProfile
 } from "firebase/auth";
 import { FaFacebookF, FaGoogle, FaTwitter } from "react-icons/fa";
 import { auth } from "../utils/firebase";
+import { useDispatch } from "react-redux";
+import { addUser } from "../utils/userSlice";
+import { USER_AVATAR } from "../utils/constants";
+
+
 
 const SignInForm = () => {
   const [isSignup, setIsSignup] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
+  const dispatch = useDispatch();
+
   const name = useRef(null);
   const emailSignUp = useRef(null);
   const passwordSignUp = useRef(null);
   const emailSignIn = useRef(null);
   const passwordSignIn = useRef(null);
+  const navigate = useNavigate();
+  
   const toggleForm = () => {
     setIsSignup(!isSignup);
   };
@@ -25,43 +36,61 @@ const SignInForm = () => {
     const message = checkValidData(emailSignIn.current.value, passwordSignIn.current.value);
     setErrorMessage(message);
     if (message) return;
-
+  
     try {
       const userCredential = await signInWithEmailAndPassword(
         auth,
         emailSignIn.current.value,
         passwordSignIn.current.value
       );
+      
+      // Signed in
       const user = userCredential.user;
       console.log(user);
+      navigate("/browse");
     } catch (error) {
       const errorCode = error.code;
       const errorMessage = error.message;
       setErrorMessage(errorCode + "-" + errorMessage);
     }
   };
-
   
-const handleSignUp = async (e) => {
-  e.preventDefault();
-  const message = checkValidData(emailSignUp.current.value, passwordSignUp.current.value);
-  setErrorMessage(message);
-  if (message) return;
-
-  try {
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      emailSignUp.current.value,
-      passwordSignUp.current.value
-    );
-    const user = userCredential.user;
-    console.log(user);
-  } catch (error) {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    setErrorMessage(errorCode + "-" + errorMessage);
-  }
-};
+  
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+    const message = checkValidData(emailSignUp.current.value, passwordSignUp.current.value);
+    setErrorMessage(message);
+    if (message) return;
+  
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        emailSignUp.current.value,
+        passwordSignUp.current.value
+      );
+      const user = userCredential.user;
+      await updateProfile(user, {
+        displayName: name.current.value,
+        photoURL: USER_AVATAR,
+      });
+      console.log(user);
+  
+      const { uid, email, displayName, photoURL } = auth.currentUser;
+      dispatch(
+        addUser({
+          uid: uid,
+          email: email,
+          displayName: displayName,
+          photoURL: photoURL,
+        })
+      );
+    } catch (error) {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      setErrorMessage(errorCode + "-" + errorMessage);
+    }
+  };
+  
 
   return (
     <div className={`container ${isSignup ? "right-panel-active" : ""}`}>

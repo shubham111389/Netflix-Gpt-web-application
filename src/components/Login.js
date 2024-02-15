@@ -13,7 +13,7 @@ const Login = () => {
           alt="logo"
         />
       </div>
-      <div className="absolute my-48 mx-[28rem]">
+      <div className="absolute my-48 mx-[25rem]">
           <SignInForm/>
       </div>
       
